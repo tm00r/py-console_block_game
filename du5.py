@@ -1,4 +1,4 @@
-class Playground:
+class Playground():
 
     def __init__(self, width, height) -> None:
         self.height = height
@@ -38,15 +38,23 @@ class Playground:
         return all(sum(row) == self.width for row in self.playground)
 
 
-
-
-
-
-class Participant:
+class GameController():
 
     def __init__(self) -> None:
         pass
 
+    def get_turn_player(playground: Playground) -> tuple[int, int]:
+        return ''
+
+    def set_field_size():
+
+
+
+
+class Participant():
+
+    def __init__(self) -> None:
+        pass
 
 
 class Player(Participant):
@@ -54,6 +62,11 @@ class Player(Participant):
     def __init__(self) -> None:
         super().__init__()
 
+
+class Computer(Participant):
+
+    def __init__(self) -> None:
+        super().__init__()
 
 
 def main():
