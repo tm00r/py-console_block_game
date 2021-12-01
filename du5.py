@@ -1,6 +1,6 @@
 import re
 import random
-from abc import ABC, abstractmethod
+
 
 class Playground():
 
@@ -22,7 +22,7 @@ class Playground():
             self.playground[y][col] = True
         for row in valid_j:
             self.playground[row][x] = True
-        self.draw_field()
+
 
     def is_blocked(self, x: int, y: int) -> bool:
         return self.playground[y][x]
@@ -55,52 +55,20 @@ class Game():
         print(f'Welcome to the {self.name}')
 
     def play(self):
-        self.game = Game()
-        game.welcome()
+        self.welcome()
 
-        width = FilterInput(input('Please enter the width of the plan: ')).is_integer()
-        height = FilterInput(input('Please enter the height of the plan: ')).is_integer()
+        width = FilterInput('Please enter the width of the plan: ').is_integer()
+        height = FilterInput('Please enter the height of the plan: ').is_integer()
         field = Playground(width, height)
+
+        players = Game.choose_players()
 
         while not field.is_full():
             field.draw_field()
 
 
-
-
-
-
-
-
-
-class FilterInput():
-    def __init__(self, value) -> None:
-        self.value = value
-
-    def get_value(self):
-        return self.value
-
-    def is_integer(self):
-        if bool(re.match(r'\d+$', self.value)):
-            return int(self.get_value())
-
-    def is_tuple(self):
-        if bool(re.match(r'\d \d+$', self.value)):
-            return tuple(map(int, self.get_value()).split(' '))
-
-
-
-
-class Player():
-
-    def __init__(self, name, type) -> None:
-        self.name = name
-        self.type = type
-
-    def __repr__(self) -> str:
-        return f"{self.name}"
-
-    def choose_type(self) -> None:
+    @staticmethod
+    def choose_players() -> tuple[int, int]:
         players = []
         for i in range(1,3):
             print()
@@ -112,15 +80,50 @@ class Player():
                 4: Maximum blocking strategies
                 5: Minimum blocking strategies
                 6: Smart terminator''')
-            players.append(FilterInput(input(f"{'First' if i == 1 else 'Second'} player: ")).is_integer())
+            players.append(FilterInput(f"{'First' if i == 1 else 'Second'} player: ").is_integer())
         return tuple(players)
 
 
 
+
+
+
+
+class FilterInput():
+
+    def __init__(self, str):
+        self.name = ""
+        self.str = str
+
+    def is_integer(self):
+        while 1:
+            value = input(self.str)
+            if bool(re.match(r'\d+$', value)):
+                self.value = value
+                return int(self.value)
+            else:
+                print('Input must contain only a number, without any other characters')
+
+    def is_tuple(self):
+        if bool(re.match(r'\d \d+$', self.value)):
+            return tuple(map(int, self.get_value()).split(' '))
+
+
+
+
+class Player():
+
+
+
+    def __init__(self, name, type) -> None:
+        self.name = name
+        self.type = type
+
+
 class User(Player):
 
-    def __init__(self) -> None:
-        super().__init__()
+    def is_player(self):
+        return
 
 
 
@@ -129,7 +132,10 @@ class Computer(Player):
     def __init__(self) -> None:
         super().__init__()
 
-    def set_strategy(self, strategy: Strategy = None) -> None:
+    def is_computer(self):
+        return True
+
+    def set_strategy(self) -> None:
         if strategy is not None:
             self.strategy = strategy
         else:
@@ -176,6 +182,7 @@ class StrategyEnding(Strategy):
 
 def main():
     game = Game()
+    game.play()
 
 if __name__=='__main__':
     main()
