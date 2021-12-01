@@ -1,10 +1,13 @@
+import re
+import random
+from abc import ABC, abstractmethod
+
 class Playground():
 
     def __init__(self, width, height) -> None:
         self.height = height
         self.width = width
         self.playground = [[False for _ in range(width)] for _ in range(height)]
-        self.draw_field()
 
     def draw_field(self) -> None:
         for row in self.playground:
@@ -38,47 +41,141 @@ class Playground():
         return all(sum(row) == self.width for row in self.playground)
 
 
-class GameController():
+
+class Game():
 
     def __init__(self) -> None:
-        pass
+        self.name = 'Blocking Game'
+        self.turn = 0
 
-    def get_turn_player(playground: Playground) -> tuple[int, int]:
-        return ''
+    # def get_turn_player(playground: Playground) -> tuple[int, int]:
+    #     return ''
 
-    def set_field_size():
+    def welcome(self):
+        print(f'Welcome to the {self.name}')
+
+    def play(self):
+        self.game = Game()
+        game.welcome()
+
+        width = FilterInput(input('Please enter the width of the plan: ')).is_integer()
+        height = FilterInput(input('Please enter the height of the plan: ')).is_integer()
+        field = Playground(width, height)
+
+        while not field.is_full():
+            field.draw_field()
 
 
 
 
-class Participant():
-
-    def __init__(self) -> None:
-        pass
 
 
-class Player(Participant):
+
+
+
+class FilterInput():
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def get_value(self):
+        return self.value
+
+    def is_integer(self):
+        if bool(re.match(r'\d+$', self.value)):
+            return int(self.get_value())
+
+    def is_tuple(self):
+        if bool(re.match(r'\d \d+$', self.value)):
+            return tuple(map(int, self.get_value()).split(' '))
+
+
+
+
+class Player():
+
+    def __init__(self, name, type) -> None:
+        self.name = name
+        self.type = type
+
+    def __repr__(self) -> str:
+        return f"{self.name}"
+
+    def choose_type(self) -> None:
+        players = []
+        for i in range(1,3):
+            print()
+            print(f"Who will play {'first' if i == 1 else 'second'}?")
+            print('''Select a player:
+                1: User
+                2: Step-by-step strategy
+                3: Random strategy
+                4: Maximum blocking strategies
+                5: Minimum blocking strategies
+                6: Smart terminator''')
+            players.append(FilterInput(input(f"{'First' if i == 1 else 'Second'} player: ")).is_integer())
+        return tuple(players)
+
+
+
+class User(Player):
 
     def __init__(self) -> None:
         super().__init__()
 
 
-class Computer(Participant):
+
+class Computer(Player):
 
     def __init__(self) -> None:
         super().__init__()
+
+    def set_strategy(self, strategy: Strategy = None) -> None:
+        if strategy is not None:
+            self.strategy = strategy
+        else:
+            self.strategy = Default()
+
+    def get_strategy(self):
+        return self.strategy
+
+    def executeStrategy(self) -> str:
+        print(self.strategy.execute())
+
+
+
+class Strategy:
+    def selection(self) -> None:
+        raise NotImplementedError('Strategy must be defined in subclass')
+
+class StrategyIterative(Strategy):
+
+    def executeStrategy(self) -> str:
+        print('StrategyIterative executed')
+
+class StrategyRandom(Strategy):
+
+    def executeStrategy(self) -> str:
+        print('StrategyRandom executed')
+
+class StrategyMaxBlock(Strategy):
+
+    def executeStrategy(self) -> str:
+        print('StrategyMaxBlock executed')
+
+class StrategyMinBlock(Strategy):
+
+    def executeStrategy(self) -> str:
+        print('StrategyMinBlock executed')
+
+class StrategyEnding(Strategy):
+
+    def executeStrategy(self) -> str:
+        print('StrategyEnding executed')
+
 
 
 def main():
-    field = Playground(3, 3)
-    # field.add_block(3, 3)
-    x = [1, 0, 2, 0, 2, 1]
-    y = [1, 0, 2, 2, 0, 1]
-    for each_X, each_Y in zip(x, y):
-        if not field.is_blocked(each_X, each_Y) and not field.is_full():
-            field.add_block( each_X, each_Y)
-        else:
-            print('DUUUUUUUUUUDE')
+    game = Game()
 
 if __name__=='__main__':
     main()
