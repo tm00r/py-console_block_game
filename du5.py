@@ -23,7 +23,6 @@ class Playground():
         for row in valid_j:
             self.playground[row][x] = True
 
-
     def is_blocked(self, x: int, y: int) -> bool:
         return self.playground[y][x]
 
@@ -75,6 +74,8 @@ class Game():
         field = Playground(width, height)
 
         players = Game.choose_players()
+        player_1 = Player(players[0])
+        player_2 = Player(players[1])
 
         while not field.is_full():
             field.draw_field()
@@ -104,7 +105,7 @@ class FilterInput():
             value = input(self.str)
             if bool(re.match(r'\d \d+$', self.value)):
                 self.value = value
-                return tuple(map(int, self.get_value()).split(' '))
+                return tuple(map(int, self.value).split(' '))
             else:
                 print('Input must contain only a pair of integer numbers separated by a space')
 
@@ -114,16 +115,25 @@ class Player():
     TotalNumberOfPlayers = 0
     MAX_Inst = 2
 
-    def __new__(cls,*args,**kwargs):
-        print ("new executing")
+    def __new__(cls, type):
         if (cls.TotalNumberOfPlayers <= cls.MAX_Inst):
             print("ERROR: Cannot create more Players!")
             return
+
         cls.TotalNumberOfPlayers += 1
+
+
         return super().__new__(cls)
 
-
-
+    @staticmethod
+    def choose_strategy(type):
+        match x:
+            case 'a':
+                return 1
+            case 'b':
+                return 2
+            case _:
+                return 0
 
 
 
