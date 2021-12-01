@@ -48,24 +48,8 @@ class Game():
         self.name = 'Blocking Game'
         self.turn = 0
 
-    # def get_turn_player(playground: Playground) -> tuple[int, int]:
-    #     return ''
-
     def welcome(self):
         print(f'Welcome to the {self.name}')
-
-    def play(self):
-        self.welcome()
-
-        width = FilterInput('Please enter the width of the plan: ').is_integer()
-        height = FilterInput('Please enter the height of the plan: ').is_integer()
-        field = Playground(width, height)
-
-        players = Game.choose_players()
-
-        while not field.is_full():
-            field.draw_field()
-
 
     @staticmethod
     def choose_players() -> tuple[int, int]:
@@ -83,9 +67,22 @@ class Game():
             players.append(FilterInput(f"{'First' if i == 1 else 'Second'} player: ").is_integer())
         return tuple(players)
 
+    def play(self):
+        self.welcome()
+
+        width = FilterInput('Please enter the width of the plan: ').is_integer()
+        height = FilterInput('Please enter the height of the plan: ').is_integer()
+        field = Playground(width, height)
+
+        players = Game.choose_players()
+
+        while not field.is_full():
+            field.draw_field()
 
 
 
+    # def get_turn_player(playground: Playground) -> tuple[int, int]:
+    #     return ''
 
 
 
@@ -111,71 +108,47 @@ class FilterInput():
 
 
 
-class Player():
+class Strategy():
+
+    def __init__(self, strategy: Strategy) -> None:
+        self.name = 'Defalut Name'
+        self._strategy = strategy
+
+    def execute_strategy(self):
+        result = self._strategy.execute_strategy()
+
+    def change_strategy(self, new_strategy):
+        self._strategy = new_strategy
 
 
+class HumanStrategy(Strategy):
 
-    def __init__(self, name, type) -> None:
-        self.name = name
-        self.type = type
-
-
-class User(Player):
-
-    def is_player(self):
-        return
-
-
-
-class Computer(Player):
-
-    def __init__(self) -> None:
-        super().__init__()
-
-    def is_computer(self):
-        return True
-
-    def set_strategy(self) -> None:
-        if strategy is not None:
-            self.strategy = strategy
-        else:
-            self.strategy = Default()
-
-    def get_strategy(self):
-        return self.strategy
-
-    def executeStrategy(self) -> str:
-        print(self.strategy.execute())
-
-
-
-class Strategy:
-    def selection(self) -> None:
-        raise NotImplementedError('Strategy must be defined in subclass')
+     def execute_strategy():
+        pass
 
 class StrategyIterative(Strategy):
 
-    def executeStrategy(self) -> str:
+    def execute_strategy(self) -> str:
         print('StrategyIterative executed')
 
 class StrategyRandom(Strategy):
 
-    def executeStrategy(self) -> str:
+    def execute_strategy(self) -> str:
         print('StrategyRandom executed')
 
 class StrategyMaxBlock(Strategy):
 
-    def executeStrategy(self) -> str:
+    def execute_strategy(self) -> str:
         print('StrategyMaxBlock executed')
 
 class StrategyMinBlock(Strategy):
 
-    def executeStrategy(self) -> str:
+    def execute_strategy(self) -> str:
         print('StrategyMinBlock executed')
 
 class StrategyEnding(Strategy):
 
-    def executeStrategy(self) -> str:
+    def execute_strategy(self) -> str:
         print('StrategyEnding executed')
 
 
