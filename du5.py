@@ -10,6 +10,7 @@ class Playground():
         self.playground = [[False for _ in range(width)] for _ in range(height)]
 
     def draw_field(self) -> None:
+        print()
         for row in self.playground:
             for elem in row:
                 print('#', end = ' ') if elem else print('.', end = ' ')
@@ -51,7 +52,7 @@ class Game():
         print(f'Welcome to the {self.name}')
 
     @staticmethod
-    def choose_players() -> tuple[int, int]:
+    def choose_players():
         players = []
         for i in range(1,3):
             print()
@@ -79,6 +80,13 @@ class Game():
 
         while not field.is_full():
             field.draw_field()
+            while 1:
+                step_1 = player_1.do_your_strategy()
+                if not field.is_blocked(step_1):
+                    field.add_block(step_1)
+                    break
+                else:
+                    print(f'The point {step1} is already blocked')
 
 
 
@@ -112,35 +120,60 @@ class FilterInput():
 
 class Player():
 
-    TotalNumberOfPlayers = 0
-    MAX_Inst = 2
+    # TotalNumberOfPlayers = 0
+    # MAX_Inst = 2
 
-    def __new__(cls, type):
-        if (cls.TotalNumberOfPlayers <= cls.MAX_Inst):
-            print("ERROR: Cannot create more Players!")
-            return
+    def __init__(self, type):
+        name, strategy = Player.choose_strategy(type)
+        self.name = name
+        self.strategy = strategy
 
-        cls.TotalNumberOfPlayers += 1
+    # def __new__(cls, type):
+    #     if (cls.TotalNumberOfPlayers >= cls.MAX_Inst):
+    #         print("ERROR: Cannot create more Players!")
+    #         return
+    #     player = super().__new__(cls)
+    #     player._init_player(Player.choose_strategy(type))
+    #     cls.TotalNumberOfPlayers += 1
+    #     return player
 
+    # def _init_player(self, name, strategy):
+    #     self.name = name
+    #     self.strategy = strategy
 
-        return super().__new__(cls)
+    def do_your_strategy(self):
+        result = Strategy(self.strategy()).execute_strategy()
 
     @staticmethod
     def choose_strategy(type):
-        match x:
-            case 'a':
-                return 1
-            case 'b':
-                return 2
-            case _:
-                return 0
+        name = 'Cumputer with'
+        match type:
+            case 1:
+                return 'User', HumanStrategy
+            case 2:
+                return name, StrategyIterative
+            case 3:
+                return name, StrategyRandom
+            case 4:
+                return name, StrategyMaxBlock
+            case 5:
+                return name, StrategyMinBlock
+            case 6:
+                return name, StrategyEnding
 
+        # return {
+        #         1: HumanStrategy,
+        #         2: StrategyIterative,
+        #         3: StrategyRandom,
+        #         4: StrategyMaxBlock,
+        #         5: StrategyMinBlock,
+        #         6: StrategyEnding,
+        #                 }.get(type)
 
 
 class Strategy():
 
     def __init__(self, strategy) -> None:
-        self.name = 'Defalut Name'
         self._strategy = strategy
 
     def execute_strategy(self):
