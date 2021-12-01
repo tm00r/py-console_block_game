@@ -84,8 +84,6 @@ class Game():
     # def get_turn_player(playground: Playground) -> tuple[int, int]:
     #     return ''
 
-
-
 class FilterInput():
 
     def __init__(self, str):
@@ -102,15 +100,36 @@ class FilterInput():
                 print('Input must contain only a number, without any other characters')
 
     def is_tuple(self):
-        if bool(re.match(r'\d \d+$', self.value)):
-            return tuple(map(int, self.get_value()).split(' '))
+        while 1:
+            value = input(self.str)
+            if bool(re.match(r'\d \d+$', self.value)):
+                self.value = value
+                return tuple(map(int, self.get_value()).split(' '))
+            else:
+                print('Input must contain only a pair of integer numbers separated by a space')
+
+
+class Player():
+
+    TotalNumberOfPlayers = 0
+    MAX_Inst = 2
+
+    def __new__(cls,*args,**kwargs):
+        print ("new executing")
+        if (cls.TotalNumberOfPlayers <= cls.MAX_Inst):
+            print("ERROR: Cannot create more Players!")
+            return
+        cls.TotalNumberOfPlayers += 1
+        return super().__new__(cls)
+
+
 
 
 
 
 class Strategy():
 
-    def __init__(self, strategy: Strategy) -> None:
+    def __init__(self, strategy) -> None:
         self.name = 'Defalut Name'
         self._strategy = strategy
 
@@ -123,8 +142,8 @@ class Strategy():
 
 class HumanStrategy(Strategy):
 
-     def execute_strategy():
-        pass
+    def execute_strategy():
+        return FilterInput('Enter a point coordinates (column space row)').is_tuple()
 
 class StrategyIterative(Strategy):
 
