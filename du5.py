@@ -1,5 +1,6 @@
+from operator import index
 import re
-import random
+import random as rand
 
 
 class Playground():
@@ -29,6 +30,14 @@ class Playground():
         x, y = tuple   #repeat :(
         return self.playground[y][x]
 
+    def not_blocked(self):
+        not_blocked = []
+        for row in self.playground:
+            for elem in row:
+                if not elem:
+                    not_blocked.append((row.index(elem), self.playground.index(row)))
+        return not_blocked
+
     def block_pos_validator(self,  tuple):
         valid_col = []
         valid_row = []
@@ -47,37 +56,51 @@ class Playground():
 
 class Game():
 
-    round_number = 0
-
     def __init__(self) -> None:
         self.name = 'Blocking Game'
+        self.field = None
 
     def welcome(self):
         print(f'Welcome to the {self.name}')
 
+    def set_field(self, field):
+        self.field = field
+
+    def get_field(self):
+        return self.field
+
     def play(self):
         self.welcome()
+        end_game_status = False
+        round_number = 0
 
         width = FilterInput('Please enter the width of the plan: ').to_integer()
         height = FilterInput('Please enter the height of the plan: ').to_integer()
-        field = Playground(width, height)
+        self.set_field(Playground(width, height))
 
         player_types = Game.choose_players()
         players = [Player(player_types[i]) for i in range(2)]
 
-        while not field.is_full():
-            field.draw_field()
+        self.field.draw_field()
+
+        while not end_game_status:
+
             for player in players:
-                while 1:
-                    print(f"Round: {Game.round_number}. Now it's player {player.name} turn")
-                    step = player.do_your_strategy()
-                    if not field.is_blocked(step):
-                        field.add_block(step)
-                        field.draw_field()
-                        break
-                    else:
-                        print(f'The point {step} is already blocked')
-                Game.round_number += 1
+                if self.field.is_full():
+                    end_game_status = True
+                else:
+                    not_blocked = self.field.not_blocked()
+                    while 1:
+                        print(f"Round: {round_number}. It's {player.name} turn")
+                        step = player.do_your_strategy(not_blocked)
+                        if not self.field.is_blocked(step):
+                            self.field.add_block(step)
+                            self.field.draw_field()
+                            break
+                        else:
+                            print(f'The point {step} is already blocked')
+                    round_number += 1
+
 
     @staticmethod
     def choose_players():
@@ -94,9 +117,6 @@ class Game():
                 6: Smart terminator''')
             players.append(FilterInput(f"{'First' if i == 1 else 'Second'} player: ").to_integer())
         return tuple(players)
-
-
-
 
 
 
@@ -132,8 +152,8 @@ class Player():
         self.name = name
         self.strategy = strategy
 
-    def do_your_strategy(self):
-        return self.strategy.execute_strategy()
+    def do_your_strategy(self, not_blocked):
+        return self.strategy.execute_strategy(not_blocked)
 
     @staticmethod
     def choose_strategy(type):
@@ -174,35 +194,34 @@ class Strategy():
     def change_strategy(self, new_strategy):
         self._strategy = new_strategy
 
-
 class HumanStrategy(Strategy):
 
-    def execute_strategy():
+    def execute_strategy(not_blocked):
         return FilterInput('Enter a point coordinates (column space row): ').to_tuple()
 
 class StrategyIterative(Strategy):
 
-    def execute_strategy(self) -> str:
-        print('StrategyIterative executed')
+    def execute_strategy(not_blocked):
+        return not_blocked[0]
 
 class StrategyRandom(Strategy):
 
-    def execute_strategy(self) -> str:
-        print('StrategyRandom executed')
+    def execute_strategy(not_blocked):
+        return not_blocked[rand.randint(0, len(not_blocked))]
 
 class StrategyMaxBlock(Strategy):
 
-    def execute_strategy(self) -> str:
+    def execute_strategy(not_blocked):
         print('StrategyMaxBlock executed')
 
 class StrategyMinBlock(Strategy):
 
-    def execute_strategy(self) -> str:
+    def execute_strategy(not_blocked):
         print('StrategyMinBlock executed')
 
 class StrategyEnding(Strategy):
 
-    def execute_strategy(self) -> str:
+    def execute_strategy(not_blocked):
         print('StrategyEnding executed')
 
 
