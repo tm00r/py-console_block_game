@@ -1,5 +1,3 @@
-from abc import ABC
-from operator import le
 import re
 import random as rand
 
@@ -26,14 +24,14 @@ class Playground():
     def add_block(self, tuple) -> None:
         x, y = tuple   #repeat :(
         valid_i, valid_j = self.block_pos_validator(tuple)
-        for col in valid_i:
-            self.playground[y][col] = True
-        for row in valid_j:
-            self.playground[row][x] = True
+        for row in valid_i:
+            self.playground[row][y] = True
+        for col in valid_j:
+            self.playground[x][col] = True
 
     def is_blocked(self, tuple) -> bool:
         x, y = tuple   #repeat :(
-        return self.playground[y][x]
+        return self.playground[x][y]
 
     def block_pos_validator(self,  tuple):
         valid_col = []
@@ -167,27 +165,46 @@ class Strategy():
 
 class HumanStrategy(Strategy):
     def execute_strategy(field):
-        return tuple_value('Enter a point coordinates (column space row): ', len(field[0]), len(field))
+        return tuple_value('Enter a point coordinates (row space column): ', len(field[0]), len(field))
 
 class StrategyСoherent(Strategy):
     def execute_strategy(field):
-        for j, row in enumerate(field):
-            for i in range(len(row)):
-                if not row[i]:
+        for i, row in enumerate(field):
+            for j in range(len(row)):
+                if not row[j]:
                     return (i, j)
 
 class StrategyRandom(Strategy):
     def execute_strategy(field):
         while 1:
-            x = rand.randint(0, len(field[0]) - 1)
-            y = rand.randint(0, len(field) - 1)
-            if not field[y][x]:
-                return (x, y)
+            row = rand.randint(0, len(field[0]) - 1)
+            col = rand.randint(0, len(field) - 1)
+            if not field[row][col]:
+                return (row, col)
 
+#
 class StrategyMaxBlock(Strategy):
     def execute_strategy(field):
-        print('StrategyMaxBlock executed')
-        return None
+        max_sum = 0
+        sum = 0
+        for row in range(1, len(field[0]) - 1):
+            for col in range(1, len(field) - 1):
+                if not field[row][col]:
+                    sum += 1
+                    if not field[row-1][col]:
+                        sum += 1
+                    if not field[row+1][col]:
+                        sum += 1
+                    if not field[row][col-1]:
+                        sum += 1
+                    if not field[row][col+1]:
+                        sum += 1
+                if sum > max_sum:
+                    max_sum = sum
+                    good_spot = (row, col)
+        if max_sum == 0:
+            good_spot = Strategy(StrategyСoherent).execute_strategy(field)
+        return good_spot
 
 class StrategyMinBlock(Strategy):
     def execute_strategy(field):
