@@ -1,3 +1,5 @@
+from abc import ABC
+from operator import le
 import re
 import random as rand
 
@@ -8,6 +10,10 @@ class Playground():
         self.height = height
         self.width = width
         self.playground = [[False for _ in range(width)] for _ in range(height)]
+
+
+    def get_field(self):
+        return self.playground
 
     def draw_field(self) -> None:
         print()
@@ -29,14 +35,6 @@ class Playground():
         x, y = tuple   #repeat :(
         return self.playground[y][x]
 
-    def not_blocked(self):
-        not_blocked = []
-        for row in self.playground:
-            for elem in row:
-                if not elem:
-                    not_blocked.append((row.index(elem), self.playground.index(row)))
-        return not_blocked
-
     def block_pos_validator(self,  tuple):
         valid_col = []
         valid_row = []
@@ -57,50 +55,9 @@ class Game():
 
     def __init__(self) -> None:
         self.name = 'Blocking Game'
-        self.field = None
 
     def welcome(self):
         print(f'Welcome to the {self.name}')
-
-    def set_field(self, field):
-        self.field = field
-
-    def get_field(self):
-        return self.field
-
-    def play(self):
-        self.welcome()
-        end_game_status = False
-        round_number = 1
-
-        width = FilterInput('Please enter the width of the plan: ').to_integer()
-        height = FilterInput('Please enter the height of the plan: ').to_integer()
-        self.set_field(Playground(width, height))
-
-        player_types = Game.choose_players()
-        players = [Player(player_types[i]) for i in range(2)]
-
-        self.field.draw_field()
-
-        while not end_game_status:
-
-            for player in players:
-                if self.field.is_full():
-                    end_game_status = True
-                else:
-                    not_blocked = self.field.not_blocked()
-                    print(f"Round: {round_number}. It's {player.name} turn")
-                    while 1:
-                        step = player.do_your_strategy(not_blocked)
-                        if not self.field.is_blocked(step):
-                            self.field.add_block(step)
-                            self.field.draw_field()
-                            break
-                        else:
-                            print(f'The point {step} is already blocked')
-                    print(f'{player.name} blocked point {step}')
-                    round_number += 1
-
 
     @staticmethod
     def choose_players():
@@ -109,81 +66,95 @@ class Game():
             print()
             print(f"Who will play {'first' if i == 1 else 'second'}?")
             print('''Select a player:
-                1: User
-                2: Step-by-step strategy
-                3: Random strategy
-                4: Maximum blocking strategies
-                5: Minimum blocking strategies
-                6: Smart terminator''')
-            players.append(FilterInput(f"{'First' if i == 1 else 'Second'} player: ").to_integer())
+                0: User
+                1: Step-by-step strategy
+                2: Random strategy
+                3: Maximum blocking strategy
+                4: Minimum blocking strategy
+                5: Nice-End strategy''')
+            players.append(integer_value(f"{'First' if i == 1 else 'Second'} player: ", 0, 5))
         return tuple(players)
 
+    def play(self):
+        self.welcome()
 
+        end_game_status = False
+        round_number = 1
 
-class FilterInput():
+        width = integer_value('Please enter the width of the plan: ', 2, 100)
+        height =  integer_value('Please enter the height of the plan: ', 2, 100)
+        field = Playground(width, height)
 
-    def __init__(self, str):
-        self.name = ""
-        self.str = str
+        player_types = Game.choose_players()
+        players = [Player(player_types[i]) for i in range(2)]
 
-    def to_integer(self):
-        while 1:
-            value = input(self.str)
-            if bool(re.match(r'\d+$', value)):
-                self.value = value
-                return int(self.value)
-            else:
-                print('Input must contain only a number, without any other characters')
+        field.draw_field()
 
-    def to_tuple(self):
-        while 1:
-            value = input(self.str)
-            if bool(re.match(r'\d \d+$', value)):
-                self.value = value
-                return tuple(map(int, self.value.split(' ')))
-            else:
-                print('Input must contain only a pair of integer numbers separated by a space')
+        while not end_game_status:
+
+            for player in players:
+                if field.is_full():
+                    end_game_status = True
+                else:
+                    print(f"Round: {round_number}. It's {player.name} turn")
+                    while 1:
+                        point = player.do_your_strategy(field.get_field())
+                        if field.is_blocked(point):
+                            print(f'The point {point} is already blocked')
+                        else:
+                            field.add_block(point)
+                            print(f'{player.name} blocked point {point}')
+                            field.draw_field()
+                            break
+                    round_number += 1
+        return f'{player.name} WON this game'
+
 
 
 class Player():
 
-    how_many_users = 0
+    namespace = {
+                    'User': 0,
+                    'Computer_with_Step-by-step_strategy': 0,
+                    'Computer_with_Random_strategy': 0,
+                    'Computer_with_MaxBlock_strategy': 0,
+                    'Computer_with_MinBlock_strategy': 0,
+                    'Computer_with_NiceEnd_strategy': 0
+                }
 
     def __init__(self, type):
         name, strategy = Player.choose_strategy(type)
         self.name = name
         self.strategy = strategy
 
-    def do_your_strategy(self, not_blocked):
-        return self.strategy.execute_strategy(not_blocked)
+    def do_your_strategy(self, field):
+        return self.strategy.execute_strategy(field)
 
     @staticmethod
     def choose_strategy(type):
-        name = 'Cumputer with '
-        Player.how_many_users += 1
+        name = list(Player.namespace.keys())[type]
+        Player.namespace[name] += 1
+        if Player.namespace[name] > 1:
+            name +='_2'
+
         match type:                 # Python 3.10.0+ is REQUIRED for 'match'
-            case 1:
-                return f'User_{Player.how_many_users}', HumanStrategy
-            case 2:
-                return name + "Step-by-step strategy", StrategyСoherent
-            case 3:
-                return name + "Random strategy", StrategyRandom
-            case 4:
-                return name + "MaxBlock strategy", StrategyMaxBlock
-            case 5:
-                return name + "MinBlock strategy", StrategyMinBlock
-            case 6:
-                return name + "Ending strategy", StrategyEnding
+            case 0: strategy = HumanStrategy
+            case 1: strategy = StrategyСoherent
+            case 2: strategy = StrategyRandom
+            case 3: strategy = StrategyMaxBlock
+            case 4: strategy = StrategyMinBlock
+            case 5: strategy = StrategyNiceEnd
 
-        # return {
-        #         1: ('User', HumanStrategy),
-        #         2: (name + "Step-by-step strategy", StrategyСoherent),
-        #         3: (name + "Random strategy", StrategyRandom),
-        #         4: (name + "MaxBlock strategy" + "MinBlock strategy", StrategyMaxBlock),
-        #         5: (name + "MinBlock strategy", StrategyMinBlock),
-        #         6: (name + "Ending strategy", StrategyEnding),
-        #                 }.get(type)
+        # strategy = {              # Python 3.10.0+ is NOT required for this
+        #             0: HumanStrategy,
+        #             1: StrategyСoherent,
+        #             2: StrategyRandom,
+        #             3: StrategyMaxBlock,
+        #             4: StrategyMinBlock,
+        #             5: StrategyNiceEnd,
+        #     }.get(type)
 
+        return name, strategy
 
 
 class Strategy():
@@ -191,41 +162,78 @@ class Strategy():
     def __init__(self, strategy) -> None:
         self._strategy = strategy
 
-    def execute_strategy(self):
-        return self._strategy.execute_strategy()
-
-    def change_strategy(self, new_strategy):
-        self._strategy = new_strategy
+    def execute_strategy(self, field):
+        return self._strategy.execute_strategy(field)
 
 class HumanStrategy(Strategy):
-    def execute_strategy(not_blocked):
-        return FilterInput('Enter a point coordinates (column space row): ').to_tuple()
+    def execute_strategy(field):
+        return tuple_value('Enter a point coordinates (column space row): ', len(field[0]), len(field))
 
 class StrategyСoherent(Strategy):
-    def execute_strategy(not_blocked):
-        return not_blocked[0]
+    def execute_strategy(field):
+        for j, row in enumerate(field):
+            for i in range(len(row)):
+                if not row[i]:
+                    return (i, j)
 
 class StrategyRandom(Strategy):
-    def execute_strategy(not_blocked):
-        return not_blocked[rand.randint(0, len(not_blocked) - 1)]
+    def execute_strategy(field):
+        while 1:
+            x = rand.randint(0, len(field[0]) - 1)
+            y = rand.randint(0, len(field) - 1)
+            if not field[y][x]:
+                return (x, y)
 
 class StrategyMaxBlock(Strategy):
-    def execute_strategy(not_blocked):
+    def execute_strategy(field):
         print('StrategyMaxBlock executed')
+        return None
 
 class StrategyMinBlock(Strategy):
-    def execute_strategy(not_blocked):
+    def execute_strategy(field):
         print('StrategyMinBlock executed')
+        return None
 
-class StrategyEnding(Strategy):
-    def execute_strategy(not_blocked):
-        print('StrategyEnding executed')
+class StrategyNiceEnd(Strategy):
+    def execute_strategy(field):
+        print('StrategyNiceEnd executed')
+        return None
+
+
+# I failed to implement this with classes
+# Сhecks the entered input for strict matching of the form, checks whether the number do not exceed the limit value. Returns the input as an integer
+def integer_value(string, min_val, max_val):
+        while 1:
+            value = input(string)
+            if not bool(re.match(r'\d+$', value)) or not (min_val <= int(value) <= max_val):
+                print(f'Input must contain only a number between {min_val} - {max_val}, without any other characters')
+            else:
+                return int(value)
+
+# I failed to implement this with classes
+# Сhecks the input (pair of numbers) for strict matching of the form, checks whether the coordinates do not exceed the limit values. Returns the input as an tuple
+def tuple_value(string, max_x, max_y):
+    output = f'Input must contain integers without any other characters. X is between 0 - {max_x}, Y is between 0 - {max_y}'
+    while 1:
+        value = input(string)
+        if not bool(re.match(r'\d \d+$', value)):
+            print(output)
+            continue
+        else:
+            value = tuple(map(int, value.split(' ')))
+            for i, item in enumerate(value):
+                if (i == 0 and item > max_x) or (i == 1 and item > max_y):
+                    break
+                else:
+                    return value
+        print(output)
+
 
 
 
 def main():
     game = Game()
-    game.play()
+    print(game.play())
 
 if __name__=='__main__':
     main()
