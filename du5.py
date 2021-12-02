@@ -1,4 +1,3 @@
-from operator import index
 import re
 import random as rand
 
@@ -72,7 +71,7 @@ class Game():
     def play(self):
         self.welcome()
         end_game_status = False
-        round_number = 0
+        round_number = 1
 
         width = FilterInput('Please enter the width of the plan: ').to_integer()
         height = FilterInput('Please enter the height of the plan: ').to_integer()
@@ -90,8 +89,8 @@ class Game():
                     end_game_status = True
                 else:
                     not_blocked = self.field.not_blocked()
+                    print(f"Round: {round_number}. It's {player.name} turn")
                     while 1:
-                        print(f"Round: {round_number}. It's {player.name} turn")
                         step = player.do_your_strategy(not_blocked)
                         if not self.field.is_blocked(step):
                             self.field.add_block(step)
@@ -99,6 +98,7 @@ class Game():
                             break
                         else:
                             print(f'The point {step} is already blocked')
+                    print(f'{player.name} blocked point {step}')
                     round_number += 1
 
 
@@ -147,6 +147,8 @@ class FilterInput():
 
 class Player():
 
+    how_many_users = 0
+
     def __init__(self, type):
         name, strategy = Player.choose_strategy(type)
         self.name = name
@@ -158,27 +160,28 @@ class Player():
     @staticmethod
     def choose_strategy(type):
         name = 'Cumputer with '
-        match type:
+        Player.how_many_users += 1
+        match type:                 # Python 3.10.0+ is REQUIRED for 'match'
             case 1:
-                return 'User', HumanStrategy
+                return f'User_{Player.how_many_users}', HumanStrategy
             case 2:
-                return name+"Iterative strategy", StrategyIterative
+                return name + "Step-by-step strategy", StrategyСoherent
             case 3:
-                return name+"Random strategy", StrategyRandom
+                return name + "Random strategy", StrategyRandom
             case 4:
-                return name+"MaxBlock strategy", StrategyMaxBlock
+                return name + "MaxBlock strategy", StrategyMaxBlock
             case 5:
-                return name+"MinBlock strategy", StrategyMinBlock
+                return name + "MinBlock strategy", StrategyMinBlock
             case 6:
-                return name+"Ending strategy", StrategyEnding
+                return name + "Ending strategy", StrategyEnding
 
         # return {
-        #         1: 'User',HumanStrategy,
-        #         2: name, StrategyIterative,
-        #         3: name, StrategyRandom,
-        #         4: name, StrategyMaxBlock,
-        #         5: name, StrategyMinBlock,
-        #         6: name, StrategyEnding,
+        #         1: ('User', HumanStrategy),
+        #         2: (name + "Step-by-step strategy", StrategyСoherent),
+        #         3: (name + "Random strategy", StrategyRandom),
+        #         4: (name + "MaxBlock strategy" + "MinBlock strategy", StrategyMaxBlock),
+        #         5: (name + "MinBlock strategy", StrategyMinBlock),
+        #         6: (name + "Ending strategy", StrategyEnding),
         #                 }.get(type)
 
 
@@ -195,32 +198,26 @@ class Strategy():
         self._strategy = new_strategy
 
 class HumanStrategy(Strategy):
-
     def execute_strategy(not_blocked):
         return FilterInput('Enter a point coordinates (column space row): ').to_tuple()
 
-class StrategyIterative(Strategy):
-
+class StrategyСoherent(Strategy):
     def execute_strategy(not_blocked):
         return not_blocked[0]
 
 class StrategyRandom(Strategy):
-
     def execute_strategy(not_blocked):
-        return not_blocked[rand.randint(0, len(not_blocked))]
+        return not_blocked[rand.randint(0, len(not_blocked) - 1)]
 
 class StrategyMaxBlock(Strategy):
-
     def execute_strategy(not_blocked):
         print('StrategyMaxBlock executed')
 
 class StrategyMinBlock(Strategy):
-
     def execute_strategy(not_blocked):
         print('StrategyMinBlock executed')
 
 class StrategyEnding(Strategy):
-
     def execute_strategy(not_blocked):
         print('StrategyEnding executed')
 
