@@ -21,7 +21,7 @@ class Playground():
         print()
 
     def add_block(self, tuple) -> None:
-        x, y = tuple   #repeat :(
+        x, y = tuple   
         valid_i, valid_j = self.block_pos_validator(tuple)
         for col in valid_i:
             self.playground[y][col] = True
@@ -29,13 +29,13 @@ class Playground():
             self.playground[row][x] = True
 
     def is_blocked(self, tuple) -> bool:
-        x, y = tuple   #repeat :(
+        x, y = tuple   
         return self.playground[y][x]
 
     def block_pos_validator(self,  tuple):
         valid_col = []
         valid_row = []
-        x, y = tuple   #repeat :(
+        x, y = tuple   
         for col, row in zip(range(x-1, x+2), range(y-1, y+2)):
             if 0 <= col <= self.width - 1:
                 valid_col.append(col)
